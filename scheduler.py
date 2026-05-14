@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_daily_analysis():
-    """Run stock analysis and send email"""
+    """Run stock analysis and prepare email"""
     logger.info("=" * 60)
     logger.info("Starting daily stock analysis...")
     logger.info("=" * 60)
@@ -43,11 +43,22 @@ def run_daily_analysis():
         for i, stock in enumerate(top_stocks, 1):
             logger.info(f"{i}. {stock['symbol']} - Score: {stock['score']}/7")
 
-        # Send email alert
-        if send_alert(top_stocks):
-            logger.info("✓ Analysis complete and email sent")
-        else:
-            logger.warning("✗ Analysis complete but email failed")
+        # Prepare email alert
+        try:
+            from notifier import EmailNotifier
+            with open('config.json', 'r') as f:
+                config = json.load(f)
+
+            notifier = EmailNotifier(config['email']['recipient'])
+            if notifier.send_stock_alert(top_stocks):
+                logger.info("✓ Analysis complete - email prepared")
+                logger.info(f"  Email saved for sending via Gmail MCP connector")
+                logger.info(f"  Run 'python send_email.py' to send")
+            else:
+                logger.warning("✗ Failed to prepare email")
+
+        except Exception as e:
+            logger.error(f"Error preparing email: {e}")
 
     except Exception as e:
         logger.error(f"Error in daily analysis: {e}")

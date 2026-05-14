@@ -43,31 +43,17 @@ Daily automated stock scanner that identifies the top 3 NSE stocks to buy each m
 pip install -r requirements.txt
 ```
 
-### 2. Configure Email (Gmail)
-
-**Important**: For security, use an App Password, not your Gmail password.
-
-**Steps to create Gmail App Password:**
-1. Go to https://myaccount.google.com/security
-2. Enable 2-Factor Authentication (if not already enabled)
-3. Go to "App passwords" 
-4. Select "Mail" and "Windows Computer" (or your device)
-5. Google generates a 16-character password
-6. Copy this password
-
-### 3. Create Configuration File
+### 2. Create Configuration File
 
 ```bash
 cp config.json.template config.json
 ```
 
-Edit `config.json`:
+Edit `config.json` and update email recipient:
 ```json
 {
   "email": {
-    "sender": "your-email@gmail.com",
-    "password": "your-16-char-app-password",
-    "recipient": "your-email@gmail.com"
+    "recipient": "your-email@gmail.com"   # ← Update this
   },
   "scheduler": {
     "run_time": "09:00",
@@ -80,6 +66,8 @@ Edit `config.json`:
   }
 }
 ```
+
+**Note**: This uses Gmail MCP connector for email delivery. No passwords needed.
 
 ### 4. Test the Analyzer
 
@@ -113,9 +101,22 @@ python scheduler.py
 
 The scheduler will:
 - Run daily at 9:00 AM IST
-- Send email with top 3 stocks
+- Analyze top 3 stocks
+- Prepare email (saved as HTML file)
 - Log results to `stock_analyzer.log`
 - Keep running in background
+
+### 6. Send Email Alert
+
+After scheduler runs, send the prepared email via Gmail MCP connector:
+
+```bash
+python send_email.py
+```
+
+This will output instructions for sending via Gmail MCP tool in Claude Code.
+
+Or manually use the Gmail MCP `create_draft` tool with the content from `email_to_send.json`.
 
 ## Running in Background (Linux/Mac)
 
@@ -210,12 +211,27 @@ Edit `notifier.py` or update `config.json`:
 - Do your own research before trading
 - Consider consulting a financial advisor
 
+## Gmail MCP Connector
+
+This system uses the Gmail MCP connector for reliable email delivery:
+
+1. **Stock analyzer** generates top picks and prepares email
+2. **Scheduler** saves email as HTML file
+3. **You send** via Gmail MCP `create_draft` tool (integrated with Claude Code)
+
+**To send email manually:**
+```bash
+python send_email.py
+```
+
+This outputs the email data in JSON format ready for Gmail MCP tool.
+
 ## Troubleshooting
 
 ### Email not sending?
-- Check Gmail app password (not regular password)
-- Verify email addresses in config.json
-- Check internet connection
+- Run `python send_email.py` to see prepared email
+- Check config.json has valid recipient email
+- Use `email_to_send.json` with Gmail MCP `create_draft` tool
 - Look at logs: `cat stock_analyzer.log`
 
 ### Stock data not downloading?

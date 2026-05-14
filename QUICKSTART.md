@@ -8,52 +8,48 @@ Get your morning stock alerts running in 5 minutes.
 pip install -r requirements.txt
 ```
 
-## Step 2: Get Gmail App Password (2 minutes)
-
-1. Go to https://myaccount.google.com/security
-2. Enable 2-Factor Authentication (if not done)
-3. Click "App passwords"
-4. Select **Mail** and your device
-5. Copy the 16-character password Google generates
-
-## Step 3: Configure (1 minute)
+## Step 2: Configure (1 minute)
 
 ```bash
 cp config.json.template config.json
 ```
 
-Edit `config.json` and replace:
-- `your-email@gmail.com` → Your Gmail address
-- `your-app-password` → The 16-character password from Step 2
-
+Edit `config.json`:
 ```json
 {
   "email": {
-    "sender": "your-email@gmail.com",          # ← Update this
-    "password": "your-16-char-app-password",   # ← Update this
-    "recipient": "your-email@gmail.com"        # ← Update this
+    "recipient": "your-email@gmail.com"   # ← Update this only
   }
 }
 ```
 
-## Step 4: Test (30 seconds)
+That's it! Uses Gmail MCP connector (no passwords needed).
+
+## Step 3: Test (30 seconds)
 
 ```bash
 python test.py
 ```
 
-This tests imports, config, and runs analyzer on 5 stocks. Should take ~30 seconds.
+This tests imports, config, and runs analyzer on 5 stocks.
 
-## Step 5: Run (Start now)
+## Step 4: Run (Start now)
 
 ```bash
 python scheduler.py
 ```
 
-That's it! The scheduler will:
-- Run at 9:00 AM IST daily
-- Email you the top 3 stocks
-- Keep running in background
+The scheduler will run at 9:00 AM IST daily and prepare emails.
+
+## Step 5: Send Email Alert
+
+After scheduler runs, send the prepared email:
+
+```bash
+python send_email.py
+```
+
+This gives you the email data to send via Gmail MCP `create_draft` tool.
 
 ## To Run in Background
 
@@ -62,7 +58,7 @@ That's it! The scheduler will:
 nohup python scheduler.py > scheduler.log 2>&1 &
 ```
 
-Check status anytime:
+Check status:
 ```bash
 tail -f scheduler.log
 ```
@@ -72,19 +68,20 @@ Use Task Scheduler to run `scheduler.py` at startup.
 
 ---
 
-## What You'll Get Each Morning
+## What You'll Get Each Day
 
 Email with:
 - 📊 Stock symbol & price
 - 🎯 Technical score (0-7)
-- 📈 Why to buy (RSI, MACD, Volume, etc.)
+- 📈 Why to buy (RSI, MACD, Volume signals)
 - ⚠️ Risk disclaimer
 
 ## Need Help?
 
-1. **Email not working?** Check password is 16 characters (not your Gmail password)
-2. **No stocks found?** Check internet connection, run `python stock_analyzer.py`
+1. **Email not prepared?** Run `python stock_analyzer.py` to test
+2. **No stocks found?** Check internet connection, Yahoo Finance might be down
 3. **Scheduler issues?** Check `stock_analyzer.log` for errors
+4. **Send email?** Run `python send_email.py` to see the prepared email
 
 ## Important
 

@@ -40,14 +40,12 @@ def test_config():
                 return False
 
         # Check email fields
-        email_fields = ['sender', 'password', 'recipient']
-        for field in email_fields:
-            if field not in config['email']:
-                logger.error(f"✗ Missing 'email.{field}' in config.json")
-                return False
-            if field == 'sender' and 'your-email' in config['email'][field]:
-                logger.error("✗ Email not configured - update config.json")
-                return False
+        if 'recipient' not in config['email']:
+            logger.error("✗ Missing 'email.recipient' in config.json")
+            return False
+        if 'your-email' in config['email']['recipient']:
+            logger.error("✗ Email not configured - update config.json")
+            return False
 
         logger.info("✓ Config file valid")
         return True

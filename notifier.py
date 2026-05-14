@@ -1,57 +1,62 @@
 #!/usr/bin/env python3
 """
 Email notification system for daily stock recommendations
+Uses Gmail MCP connector for reliable delivery
 """
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from typing import List, Dict
 import logging
 from datetime import datetime
+import json
 
 logger = logging.getLogger(__name__)
 
 
 class EmailNotifier:
-    def __init__(self, sender_email: str, sender_password: str, recipient_email: str):
+    def __init__(self, recipient_email: str):
         """
         Initialize email notifier
         Args:
-            sender_email: Gmail address (e.g., 'your-email@gmail.com')
-            sender_password: Gmail app-specific password
             recipient_email: Email to send alerts to
         """
-        self.sender_email = sender_email
-        self.sender_password = sender_password
         self.recipient_email = recipient_email
 
     def send_stock_alert(self, stocks: List[Dict]) -> bool:
-        """Send email with top stocks"""
+        """
+        Generate email content for stock alert
+        Note: Actual sending is done via Gmail MCP tools
+        """
         try:
             # Create HTML email
             html_content = self._create_html_content(stocks)
 
-            # Create message
-            message = MIMEMultipart('alternative')
-            message['Subject'] = f"📈 Top 3 Intraday Stocks - {datetime.now().strftime('%Y-%m-%d')}"
-            message['From'] = self.sender_email
-            message['To'] = self.recipient_email
+            # Save to file for manual sending via Gmail MCP tool
+            filename = f"stock_alert_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            with open(filename, 'w') as f:
+                f.write(html_content)
 
-            # Attach HTML
-            html_part = MIMEText(html_content, 'html')
-            message.attach(html_part)
+            subject = f"📈 Top 3 Intraday Stocks - {datetime.now().strftime('%Y-%m-%d')}"
 
-            # Send email
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-                server.login(self.sender_email, self.sender_password)
-                server.sendmail(self.sender_email, self.recipient_email, message.as_string())
+            logger.info(f"Email ready: {filename}")
+            logger.info(f"Subject: {subject}")
+            logger.info(f"Recipient: {self.recipient_email}")
+            logger.info("To send: Use 'python send_email.py' command")
 
-            logger.info(f"Email sent successfully to {self.recipient_email}")
+            # Also save metadata for sending
+            metadata = {
+                "subject": subject,
+                "recipient": self.recipient_email,
+                "html_file": filename,
+                "timestamp": datetime.now().isoformat()
+            }
+
+            with open("email_metadata.json", "w") as f:
+                json.dump(metadata, f, indent=2)
+
             return True
 
         except Exception as e:
-            logger.error(f"Failed to send email: {e}")
+            logger.error(f"Failed to prepare email: {e}")
             return False
 
     def _create_html_content(self, stocks: List[Dict]) -> str:
