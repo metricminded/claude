@@ -1,0 +1,16 @@
+{
+  "email": {
+    "sender": "your-email@gmail.com",
+    "password": "your-app-specific-password",
+    "recipient": "your-email@gmail.com"
+  },
+  "scheduler": {
+    "run_time": "09:00",
+    "timezone": "Asia/Kolkata"
+  },
+  "analysis": {
+    "stocks_to_analyze": 500,
+    "top_picks": 3,
+    "lookback_days": 90
+  }
+}
