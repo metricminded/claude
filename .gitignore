@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Configuration (user-specific)
+config.json
+email_metadata.json
+email_to_send.json
+
+# Logs
+*.log
+stock_analyzer.log
+scheduler.log
+cron.log
+
+# Generated files
+*.html
+stock_alert_*.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
