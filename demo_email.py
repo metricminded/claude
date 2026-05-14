@@ -21,8 +21,13 @@ def main():
     stocks = get_demo_stocks()
     logger.info(f"\n✓ Generated {len(stocks)} demo stocks")
 
+    # Get email from config
+    import json
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+
     # Create notifier and prepare email
-    notifier = EmailNotifier("your-email@example.com")
+    notifier = EmailNotifier(config['email']['recipient'])
 
     logger.info("\n📧 Preparing email...")
     if notifier.send_stock_alert(stocks):
