@@ -15,7 +15,9 @@ config.json
 email_metadata.json
 email_to_send.json
 
-# Logs
+# Logs & Output Directories
+logs/
+results/
 *.log
 stock_analyzer.log
 scheduler.log
