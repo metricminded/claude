@@ -18,6 +18,7 @@ email_to_send.json
 # Logs & Output Directories
 logs/
 results/
+backtest_results/
 *.log
 stock_analyzer.log
 scheduler.log
