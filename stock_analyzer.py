@@ -10,6 +10,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import logging
 from typing import List, Dict, Tuple
+import time
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,17 +53,18 @@ class StockAnalyzer:
         signal = macd.ewm(span=9).mean()
         return macd, signal
 
-    def analyze_stock(self, symbol: str) -> Dict:
-        """Analyze single stock and return signals"""
-        try:
-            # Fetch 3 months of data for analysis
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=90)
+    def analyze_stock(self, symbol: str, retries: int = 3) -> Dict:
+        """Analyze single stock and return signals with retry logic"""
+        for attempt in range(retries):
+            try:
+                # Fetch 3 months of data for analysis
+                end_date = datetime.now()
+                start_date = end_date - timedelta(days=90)
 
-            data = yf.download(symbol, start=start_date, end=end_date, progress=False)
+                data = yf.download(symbol, start=start_date, end=end_date, progress=False)
 
-            if len(data) < 30:
-                return None
+                if len(data) < 30:
+                    return None
 
             close = data['Close']
             volume = data['Volume']
@@ -117,20 +119,27 @@ class StockAnalyzer:
                 score += 1
                 signals.append(f"Gap up {gap_up:.2f}%")
 
-            return {
-                'symbol': symbol,
-                'price': latest_close,
-                'score': score,
-                'rsi': latest_rsi,
-                'macd_momentum': latest_macd - latest_signal,
-                'signals': signals,
-                'gap_up': gap_up,
-                'volume_ratio': latest_volume / avg_volume,
-            }
+                return {
+                    'symbol': symbol,
+                    'price': latest_close,
+                    'score': score,
+                    'rsi': latest_rsi,
+                    'macd_momentum': latest_macd - latest_signal,
+                    'signals': signals,
+                    'gap_up': gap_up,
+                    'volume_ratio': latest_volume / avg_volume,
+                }
 
-        except Exception as e:
-            logger.warning(f"Error analyzing {symbol}: {e}")
-            return None
+            except Exception as e:
+                if attempt < retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.debug(f"Retry {attempt + 1}/{retries} for {symbol} after {wait_time}s: {e}")
+                    time.sleep(wait_time)
+                else:
+                    logger.warning(f"Failed to analyze {symbol} after {retries} attempts: {e}")
+                    return None
+
+        return None
 
     def get_top_stocks(self, limit: int = 3) -> List[Dict]:
         """Get top N stocks by score"""
