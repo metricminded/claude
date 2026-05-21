@@ -12,19 +12,23 @@ except ImportError:
 
 
 def generate_synthetic_jp_power_data(days: int = 90) -> np.ndarray:
-    """Generate realistic JP Power price data."""
+    """Generate realistic JP Power price data ending at current price."""
     np.random.seed(42)  # Consistent seed for JP Power
 
-    # JP Power actual price range (₹18-22)
-    current_price = 18.5
-    prices = [current_price]
+    # Generate 90 days of price data working backwards from current price
+    current_price = 18.56  # Today's actual price
+    prices = [17.5]  # Start from 90 days ago
 
     for _ in range(days - 1):
         daily_return = np.random.normal(0.0003, 0.012)
         new_price = prices[-1] * (1 + daily_return)
         prices.append(new_price)
 
-    return np.array(prices)
+    # Scale prices so today (last day) is exactly 18.56
+    prices = np.array(prices)
+    prices = prices * (current_price / prices[-1])
+
+    return prices
 
 
 def predict_jp_power():
