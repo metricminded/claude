@@ -15,8 +15,8 @@ def generate_synthetic_jp_power_data(days: int = 90) -> np.ndarray:
     """Generate realistic JP Power price data."""
     np.random.seed(42)  # Consistent seed for JP Power
 
-    # JP Power typical price range
-    current_price = 180.0
+    # JP Power actual price range (₹18-22)
+    current_price = 18.5
     prices = [current_price]
 
     for _ in range(days - 1):

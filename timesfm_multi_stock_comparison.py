@@ -18,7 +18,7 @@ def generate_stock_prices(symbol: str, days: int = 90) -> np.ndarray:
     base_prices = {
         "RELIANCE.NS": 2450,    # Large cap - oil & gas
         "TCS.NS": 3600,         # Large cap - IT
-        "JPOWER.NS": 180,       # Mid cap - Power/Hydro
+        "JPOWER.NS": 18.5,      # Mid cap - Power/Hydro (actual price ~₹18.5)
         "SUNPHARMA.NS": 750,    # Large cap - Pharma
         "TITAN.NS": 3200,       # Large cap - Retail
     }
