@@ -39,6 +39,7 @@ class StockAnalyzer:
             'BHARTIARTL.NS', 'ITC.NS', 'JSWSTEEL.NS', 'ULTRACEMCO.NS', 'BPCL.NS',
             'TATASTEEL.NS', 'ONGC.NS', 'EICHERMOT.NS', 'TITAN.NS', 'M&M.NS',
             'NESTLEIND.NS', 'POWERGRID.NS', 'HAVELLS.NS', 'DMART.NS', 'BOSCHIND.NS',
+            'JPOWER.NS',  # JP Power - Hydro power producer
         ]
         return top_stocks[:count]
 
