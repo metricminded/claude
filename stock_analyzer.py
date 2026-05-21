@@ -66,58 +66,58 @@ class StockAnalyzer:
                 if len(data) < 30:
                     return None
 
-            close = data['Close']
-            volume = data['Volume']
+                close = data['Close']
+                volume = data['Volume']
 
-            # Calculate indicators
-            rsi = self._calculate_rsi(close)
-            macd, signal = self._calculate_macd(close)
+                # Calculate indicators
+                rsi = self._calculate_rsi(close)
+                macd, signal = self._calculate_macd(close)
 
-            sma_50 = close.rolling(window=50).mean()
-            sma_200 = close.rolling(window=200).mean()
+                sma_50 = close.rolling(window=50).mean()
+                sma_200 = close.rolling(window=200).mean()
 
-            # Latest values
-            latest_close = close.iloc[-1]
-            latest_rsi = rsi.iloc[-1]
-            latest_macd = macd.iloc[-1]
-            latest_signal = signal.iloc[-1]
-            latest_volume = volume.iloc[-1]
-            avg_volume = volume.iloc[-20:].mean()
+                # Latest values
+                latest_close = close.iloc[-1]
+                latest_rsi = rsi.iloc[-1]
+                latest_macd = macd.iloc[-1]
+                latest_signal = signal.iloc[-1]
+                latest_volume = volume.iloc[-1]
+                avg_volume = volume.iloc[-20:].mean()
 
-            prev_close = close.iloc[-2]
-            gap_up = ((latest_close - prev_close) / prev_close) * 100
+                prev_close = close.iloc[-2]
+                gap_up = ((latest_close - prev_close) / prev_close) * 100
 
-            # Scoring system
-            score = 0
-            signals = []
+                # Scoring system
+                score = 0
+                signals = []
 
-            # RSI signal (30-70 range ideal for trading)
-            if 30 < latest_rsi < 70:
-                score += 1
-                signals.append(f"RSI in trading range ({latest_rsi:.1f})")
-            elif latest_rsi < 30:
-                score += 2
-                signals.append(f"RSI oversold ({latest_rsi:.1f}) - potential bounce")
+                # RSI signal (30-70 range ideal for trading)
+                if 30 < latest_rsi < 70:
+                    score += 1
+                    signals.append(f"RSI in trading range ({latest_rsi:.1f})")
+                elif latest_rsi < 30:
+                    score += 2
+                    signals.append(f"RSI oversold ({latest_rsi:.1f}) - potential bounce")
 
-            # MACD crossover
-            if latest_macd > latest_signal and macd.iloc[-2] <= signal.iloc[-2]:
-                score += 2
-                signals.append("MACD bullish crossover")
+                # MACD crossover
+                if latest_macd > latest_signal and macd.iloc[-2] <= signal.iloc[-2]:
+                    score += 2
+                    signals.append("MACD bullish crossover")
 
-            # Moving average crossover
-            if sma_50.iloc[-1] > sma_200.iloc[-1]:
-                score += 1
-                signals.append("Price above 200-day MA")
+                # Moving average crossover
+                if sma_50.iloc[-1] > sma_200.iloc[-1]:
+                    score += 1
+                    signals.append("Price above 200-day MA")
 
-            # Volume spike
-            if latest_volume > avg_volume * 1.5:
-                score += 1
-                signals.append(f"Volume spike ({latest_volume/avg_volume:.1f}x avg)")
+                # Volume spike
+                if latest_volume > avg_volume * 1.5:
+                    score += 1
+                    signals.append(f"Volume spike ({latest_volume/avg_volume:.1f}x avg)")
 
-            # Gap up
-            if gap_up > 0.5:
-                score += 1
-                signals.append(f"Gap up {gap_up:.2f}%")
+                # Gap up
+                if gap_up > 0.5:
+                    score += 1
+                    signals.append(f"Gap up {gap_up:.2f}%")
 
                 return {
                     'symbol': symbol,
