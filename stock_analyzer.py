@@ -9,13 +9,20 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import logging
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+try:
+    from timesfm import TimesFM
+    TIMESFM_AVAILABLE = True
+except ImportError:
+    TIMESFM_AVAILABLE = False
+    logger.warning("TimesFM not installed. Install with: pip install timesfm")
 
 
 class StockAnalyzer:
@@ -51,6 +58,35 @@ class StockAnalyzer:
         macd = ema_12 - ema_26
         signal = macd.ewm(span=9).mean()
         return macd, signal
+
+    def _predict_with_timesfm(self, prices: np.ndarray) -> Optional[Dict]:
+        """Predict next day price using TimesFM"""
+        if not TIMESFM_AVAILABLE or len(prices) < 20:
+            return None
+
+        try:
+            tfm = TimesFM(context_len=512, prediction_len=1, num_layers=20)
+            ts_input = np.array([prices]).astype(np.float32)
+            forecast_result = tfm.forecast(ts_input, num_samples=100)
+
+            predicted_price = float(np.mean(forecast_result, axis=0)[0])
+            lower_bound = float(np.percentile(forecast_result, 5, axis=0)[0])
+            upper_bound = float(np.percentile(forecast_result, 95, axis=0)[0])
+
+            current_price = float(prices[-1])
+            price_change = predicted_price - current_price
+            change_percent = (price_change / current_price) * 100
+
+            return {
+                'predicted_price': predicted_price,
+                'price_change': price_change,
+                'change_percent': change_percent,
+                'confidence_lower': lower_bound,
+                'confidence_upper': upper_bound,
+            }
+        except Exception as e:
+            logger.debug(f"TimesFM prediction failed: {e}")
+            return None
 
     def analyze_stock(self, symbol: str) -> Dict:
         """Analyze single stock and return signals"""
@@ -117,7 +153,10 @@ class StockAnalyzer:
                 score += 1
                 signals.append(f"Gap up {gap_up:.2f}%")
 
-            return {
+            # TimesFM prediction
+            timesfm_prediction = self._predict_with_timesfm(close.values)
+
+            result = {
                 'symbol': symbol,
                 'price': latest_close,
                 'score': score,
@@ -127,6 +166,11 @@ class StockAnalyzer:
                 'gap_up': gap_up,
                 'volume_ratio': latest_volume / avg_volume,
             }
+
+            if timesfm_prediction:
+                result['timesfm'] = timesfm_prediction
+
+            return result
 
         except Exception as e:
             logger.warning(f"Error analyzing {symbol}: {e}")
@@ -166,6 +210,12 @@ def main():
         logger.info(f"   Price: ₹{stock['price']:.2f}")
         logger.info(f"   Score: {stock['score']}/7")
         logger.info(f"   RSI: {stock['rsi']:.1f}")
+
+        if 'timesfm' in stock:
+            pred = stock['timesfm']
+            logger.info(f"   TimesFM Prediction: ₹{pred['predicted_price']:.2f} ({pred['change_percent']:+.2f}%)")
+            logger.info(f"   Confidence Range: ₹{pred['confidence_lower']:.2f} - ₹{pred['confidence_upper']:.2f}")
+
         logger.info(f"   Signals:")
         for signal in stock['signals']:
             logger.info(f"     • {signal}")
