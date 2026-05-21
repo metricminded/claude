@@ -61,7 +61,7 @@ class StockAnalyzer:
         return macd, signal
 
     def _predict_with_timesfm(self, prices: np.ndarray) -> Optional[Dict]:
-        """Predict next day price using TimesFM"""
+        """Predict tomorrow's (next trading day) price using TimesFM"""
         if not TIMESFM_AVAILABLE or len(prices) < 20:
             return None
 
@@ -84,6 +84,7 @@ class StockAnalyzer:
                 'change_percent': change_percent,
                 'confidence_lower': lower_bound,
                 'confidence_upper': upper_bound,
+                'timeframe': 'next_trading_day',
             }
         except Exception as e:
             logger.debug(f"TimesFM prediction failed: {e}")
@@ -214,8 +215,8 @@ def main():
 
         if 'timesfm' in stock:
             pred = stock['timesfm']
-            logger.info(f"   TimesFM Prediction: ₹{pred['predicted_price']:.2f} ({pred['change_percent']:+.2f}%)")
-            logger.info(f"   Confidence Range: ₹{pred['confidence_lower']:.2f} - ₹{pred['confidence_upper']:.2f}")
+            logger.info(f"   Tomorrow's Predicted Price: ₹{pred['predicted_price']:.2f} ({pred['change_percent']:+.2f}%)")
+            logger.info(f"   Confidence Range (90%): ₹{pred['confidence_lower']:.2f} - ₹{pred['confidence_upper']:.2f}")
 
         logger.info(f"   Signals:")
         for signal in stock['signals']:

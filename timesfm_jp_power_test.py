@@ -57,10 +57,10 @@ def predict_jp_power():
         change_percent = ((predicted_price - current_price) / current_price) * 100
 
         print(f"{'='*70}")
-        print(f"🎯 PREDICTION RESULTS [DEMO MODE]")
+        print(f"🎯 PREDICTION FOR TOMORROW (Next Trading Day)")
         print(f"{'='*70}")
-        print(f"Current Price:           ₹{current_price:.2f}")
-        print(f"Predicted Next Day:      ₹{predicted_price:.2f}")
+        print(f"Today's Price:           ₹{current_price:.2f}")
+        print(f"Tomorrow's Predicted:    ₹{predicted_price:.2f}")
         print(f"Expected Change:         {change_percent:+.3f}%")
         print(f"Confidence Range (±2%):  ₹{predicted_price*0.98:.2f} - ₹{predicted_price*1.02:.2f}")
         print(f"{'='*70}\n")
