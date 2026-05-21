@@ -15,6 +15,12 @@ config.json
 email_metadata.json
 email_to_send.json
 
+# Kite Connect credentials (NEVER commit!)
+.kite_token
+config_kite.json
+.env
+*.env
+
 # Logs & Output Directories
 logs/
 results/
